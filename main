@@ -1,13 +1,18 @@
 import requests
 import pandas as pd
 
-file_loc = 'file/location'
+#pulling the raw data
+file_loc = 'file/location/desired_names.xlsx'
 response = requests.get("https://api.census.gov/data/2010/surname?get=NAME,PCTHISPANIC&RANK=1:100")
 
+#selects the column of relevant data which is in the form [First Name] [Middle Name] [Last Name]
 df = pd.read_excel(file_loc, index_col = None, na_values= ['NA'], usecols = "B")
 
-df = df.values.tolist()
+#converting dataframe to list
+dfl = df.values.tolist()
+
+#setting up the list of lastnames that will be calculated as hispanic/not hispanic
 lastnames = []
 
-for x in df[:100]:
-    lastnames.append(x[0].rsplit(' ', 1)[1])
+for x in dfl:
+    lastnames.append(x[0].rsplit(' ', 1)[1].upper())
