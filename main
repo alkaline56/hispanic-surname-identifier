@@ -1,0 +1,13 @@
+import requests
+import pandas as pd
+
+file_loc = 'file/location'
+response = requests.get("https://api.census.gov/data/2010/surname?get=NAME,PCTHISPANIC&RANK=1:100")
+
+df = pd.read_excel(file_loc, index_col = None, na_values= ['NA'], usecols = "B")
+
+df = df.values.tolist()
+lastnames = []
+
+for x in df[:100]:
+    lastnames.append(x[0].rsplit(' ', 1)[1])
