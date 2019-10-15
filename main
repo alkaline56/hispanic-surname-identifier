@@ -1,18 +1,38 @@
 import requests
+import csv
+import json
 import pandas as pd
 
-#pulling the raw data
-file_loc = 'file/location/desired_names.xlsx'
-response = requests.get("https://api.census.gov/data/2010/surname?get=NAME,PCTHISPANIC&RANK=1:100")
 
-#selects the column of relevant data which is in the form [First Name] [Middle Name] [Last Name]
+file_loc = 'names_file.xlsx'
+
+response = requests.get("https://api.census.gov/data/2010/surname?get=NAME,COUNT,PCTHISPANIC&RANK=1:4508991")
+respJson = response.json()
+respDict = {item[0]: item[1:] for item in respJson[1:]}
+
 df = pd.read_excel(file_loc, index_col = None, na_values= ['NA'], usecols = "B")
 
-#converting dataframe to list
-dfl = df.values.tolist()
-
-#setting up the list of lastnames that will be calculated as hispanic/not hispanic
+df = df.values.tolist()
 lastnames = []
 
-for x in dfl:
-    lastnames.append(x[0].rsplit(' ', 1)[1].upper())
+for x in df:
+    try:
+        lastnames.append(x[0].rsplit(' ', 1)[1].upper())
+
+    except IndexError:
+        lastnames.append("error")
+
+hispanicness = []
+for name in lastnames:
+    values = respDict.get(name)
+    if values is None:
+        hispanicness.append("0")
+    else:
+        hispanicness.append(respDict.get(name)[1])
+
+newFile = 'C:/Users/chernandez/Documents/TheCSV.csv'
+
+
+with open(newFile,'w',newline='') as myfile:
+    wr = csv.writer(myfile, quoting = csv.QUOTE_ALL)
+    wr.writerow(hispanicness)
